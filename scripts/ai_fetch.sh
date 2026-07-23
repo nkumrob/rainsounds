@@ -15,6 +15,7 @@
 #
 # Env knobs:
 #   AI_DURATION  clip length in seconds (default 22; provider caps apply)
+#   AI_LOOP=1    ask the provider to make the clip loop smoothly (elevenlabs only)
 #   DRY_RUN=1    print the request that would be made, don't call the API
 #
 # This script is OPTIONAL. The procedural generators (generators.sh) remain the
@@ -78,13 +79,19 @@ case "$PROVIDER" in
   elevenlabs)
     OUT="${OUT_BASE}.mp3"
     URL="https://api.elevenlabs.io/v1/sound-generation"
-    BODY=$(PROMPT="$PROMPT" DURATION="$DURATION" python3 -c '
+    BODY=$(PROMPT="$PROMPT" DURATION="$DURATION" LOOP="${AI_LOOP:-0}" python3 -c '
 import json, os
-print(json.dumps({
+body = {
     "text": os.environ["PROMPT"],
     "duration_seconds": float(os.environ["DURATION"]),
     "prompt_influence": 0.5,
-}))')
+}
+# Opt-in: ask ElevenLabs to synthesize an already-loopable clip. The pipeline
+# still runs its own swap-halves+crossfade, but a natively-looping seed gives a
+# cleaner seam. See https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert
+if os.environ["LOOP"] == "1":
+    body["loop"] = True
+print(json.dumps(body))')
     if [[ "${DRY_RUN:-0}" == "1" ]]; then
       log "[dry-run] POST $URL"
       log "[dry-run] header: xi-api-key: \$ELEVENLABS_API_KEY"
