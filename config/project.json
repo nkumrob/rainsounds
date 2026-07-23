@@ -15,11 +15,11 @@
   },
 
   "audio": {
-    "mode": "procedural",
+    "mode": "asset",
     "type": "rain",
-    "asset_path": "assets/rain.wav",
-    "loop_seconds": 300,
-    "crossfade_seconds": 8,
+    "asset_path": "assets/rain_tent.mp3",
+    "loop_seconds": 16,
+    "crossfade_seconds": 6,
     "intensity": "medium",
     "target_lufs": -20
   }

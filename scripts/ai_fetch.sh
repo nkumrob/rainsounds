@@ -78,13 +78,20 @@ case "$PROVIDER" in
   elevenlabs)
     OUT="${OUT_BASE}.mp3"
     URL="https://api.elevenlabs.io/v1/sound-generation"
-    BODY=$(PROMPT="$PROMPT" DURATION="$DURATION" python3 -c '
+    # PROMPT_INFLUENCE (0..1): higher = stick literally to the prompt (good for
+    #   steady textures like rain; low values let the model add tonal/musical
+    #   flourishes that sound "pitchy"). LOOP=1 asks ElevenLabs for a seamless clip.
+    BODY=$(PROMPT="$PROMPT" DURATION="$DURATION" \
+           PINF="${PROMPT_INFLUENCE:-0.5}" LOOP="${LOOP:-0}" python3 -c '
 import json, os
-print(json.dumps({
+body = {
     "text": os.environ["PROMPT"],
     "duration_seconds": float(os.environ["DURATION"]),
-    "prompt_influence": 0.5,
-}))')
+    "prompt_influence": float(os.environ["PINF"]),
+}
+if os.environ.get("LOOP") == "1":
+    body["loop"] = True
+print(json.dumps(body))')
     if [[ "${DRY_RUN:-0}" == "1" ]]; then
       log "[dry-run] POST $URL"
       log "[dry-run] header: xi-api-key: \$ELEVENLABS_API_KEY"

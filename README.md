@@ -139,6 +139,25 @@ licensed output — ElevenLabs paid plans, Stable Audio's commercial API, or the
 local *Stable Audio Open Small* model. Avoid non-commercial-only model weights.
 Procedural generators stay the free, offline default; AI is an opt-in upgrade.
 
+## Website — `site/`
+
+A single-page, no-build web player: land, press **begin**, and it rains
+forever. Generative canvas rain (three parallax depth layers) with three
+switchable moods — **drizzle / downpour / tent** — that crossfade the audio
+over 2 s while the visual weather morphs to match. Night + overcast-day
+themes, volume (persisted), 15/30/60-min sleep timer with a slow fade-out,
+space + 1/2/3 keyboard shortcuts, Media Session lock-screen controls,
+`prefers-reduced-motion` fallback.
+
+```bash
+./scripts/make_web_audio.sh          # assets/*.mp3 -> site/audio/*.wav (seamless loops)
+cd site && python3 -m http.server    # or host site/ anywhere static (GitHub Pages etc.)
+```
+
+Audio is served as WAV (universally decodable, no encoder padding) and looped
+sample-accurately via Web Audio, so the loop is truly gapless; a plain
+`<audio loop>` fallback covers browsers without Web Audio.
+
 ## Presets
 
 Alternate configs live in `config/`. Point `CONFIG_FILE` at one for any target:

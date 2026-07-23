@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en" data-theme="night">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>rain sounds</title>
+<meta name="description" content="Endless rain. Three moods. Nothing else. Press begin and stay a while.">
+<meta name="theme-color" content="#070b12">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 4C16 4 7 15.5 7 21a9 9 0 0 0 18 0C25 15.5 16 4 16 4Z' fill='%238fa8c8'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<canvas id="rain" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- Intro: the first tap is the ritual (autoplay is blocked anyway) -->
+<div class="intro" id="intro">
+  <h1 class="wordmark">rain sounds</h1>
+  <p class="tagline">endless rain. three moods. nothing else.</p>
+  <button class="begin" id="begin">
+    <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="23" fill="none" stroke="currentColor" stroke-width="1"/><path d="M20 16.5v15l12-7.5z" fill="currentColor"/></svg>
+    <span>begin</span>
+  </button>
+  <p class="intro-note" id="intro-note" hidden></p>
+</div>
+
+<!-- Controls: fade away when you stop moving -->
+<header class="brand" id="brand" hidden>
+  <span class="brand-mark">rain sounds</span>
+</header>
+
+<footer class="controls" id="controls" hidden>
+  <div class="controls-row">
+    <button class="ctl play" id="play" aria-label="Pause" aria-keyshortcuts="Space">
+      <svg class="ic-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5h2.6v13H8zM13.4 5.5H16v13h-2.6z" fill="currentColor"/></svg>
+      <svg class="ic-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.5v13l10-6.5z" fill="currentColor"/></svg>
+    </button>
+
+    <nav class="moods" aria-label="Rain mood">
+      <button class="mood" data-mood="drizzle" aria-keyshortcuts="1">drizzle</button>
+      <button class="mood" data-mood="downpour" aria-keyshortcuts="2">downpour</button>
+      <button class="mood" data-mood="tent" aria-keyshortcuts="3">tent</button>
+    </nav>
+
+    <div class="right">
+      <label class="volume">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor"/><path d="M15 9a4.2 4.2 0 0 1 0 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <input type="range" id="volume" min="0" max="100" step="1" value="80" aria-label="Volume">
+      </label>
+      <button class="ctl timer" id="timer" aria-label="Sleep timer">timer</button>
+      <button class="ctl theme" id="theme" aria-label="Switch to day">
+        <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+  <p class="mood-desc" id="mood-desc"></p>
+</footer>
+
+<noscript><p class="noscript">rain sounds needs JavaScript to make it rain.</p></noscript>
+
+<script src="app.js"></script>
+</body>
+</html>
