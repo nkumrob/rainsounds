@@ -2,6 +2,7 @@ build/
 output/
 assets/*
 !assets/.gitkeep
+!assets/README.md
 *.ppm
 *.log
 .DS_Store

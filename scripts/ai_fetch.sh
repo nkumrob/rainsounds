@@ -32,6 +32,33 @@ need curl
 
 OUT_BASE="$ASSETS_DIR/$NAME"
 
+# POST helper that classifies failures: connection/egress-policy blocks vs HTTP
+# errors, so a blocked host in a restricted environment gives actionable advice
+# instead of a raw "curl (56) CONNECT tunnel failed".
+_post() {  # _post OUT_FILE curl-args...
+  local out="$1"; shift
+  local code rc
+  set +e
+  code=$(curl -sS -w '%{http_code}' -o "$out" "$@")
+  rc=$?
+  set -e
+  if [[ $rc -ne 0 ]]; then
+    rm -f "$out"
+    if [[ $rc -eq 56 || $rc -eq 7 || $rc -eq 35 ]]; then
+      warn "Could not connect to the API host (curl $rc)."
+      warn "In a restricted / agent environment the egress policy may block it."
+      warn "Fixes: allow this host in your environment's network policy, or run"
+      warn "this script on your own machine where outbound HTTPS is open."
+    fi
+    die "request failed (curl exit $rc)"
+  fi
+  case "$code" in
+    200) : ;;
+    401|403) warn "$(head -c 300 "$out" 2>/dev/null)"; rm -f "$out"; die "HTTP $code — check the API key / plan permissions." ;;
+    *)   warn "$(head -c 300 "$out" 2>/dev/null)"; rm -f "$out"; die "API returned HTTP $code" ;;
+  esac
+}
+
 hint_next() {
   local f="$1"
   cat >&2 <<EOF
@@ -67,11 +94,10 @@ print(json.dumps({
     fi
     [[ -n "${ELEVENLABS_API_KEY:-}" ]] || die "set ELEVENLABS_API_KEY (get one at https://elevenlabs.io/api)."
     log "Requesting ElevenLabs SFX: \"$PROMPT\" (${DURATION}s)"
-    http=$(curl -sS -w '%{http_code}' -o "$OUT" -X POST "$URL" \
+    _post "$OUT" -X POST "$URL" \
       -H "xi-api-key: ${ELEVENLABS_API_KEY}" \
       -H "Content-Type: application/json" \
-      -d "$BODY")
-    [[ "$http" == "200" ]] || { warn "$(cat "$OUT" 2>/dev/null | head -c 400)"; rm -f "$OUT"; die "ElevenLabs API returned HTTP $http"; }
+      -d "$BODY"
     hint_next "$OUT"
     ;;
 
@@ -87,13 +113,12 @@ print(json.dumps({
     fi
     [[ -n "${STABILITY_API_KEY:-}" ]] || die "set STABILITY_API_KEY (get one at https://platform.stability.ai/)."
     log "Requesting Stable Audio: \"$PROMPT\" (${DURATION}s)"
-    http=$(curl -sS -w '%{http_code}' -o "$OUT" -X POST "$URL" \
+    _post "$OUT" -X POST "$URL" \
       -H "Authorization: Bearer ${STABILITY_API_KEY}" \
       -H "Accept: audio/*" \
       -F "prompt=${PROMPT}" \
       -F "duration=${DURATION}" \
-      -F "output_format=wav")
-    [[ "$http" == "200" ]] || { warn "$(cat "$OUT" 2>/dev/null | head -c 400)"; rm -f "$OUT"; die "Stability API returned HTTP $http"; }
+      -F "output_format=wav"
     hint_next "$OUT"
     ;;
 
