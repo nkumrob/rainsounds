@@ -132,16 +132,17 @@ AI_PROVIDER=stableaudio AI_DURATION=90 ./scripts/ai_fetch.sh "calm ocean at nigh
 # See the exact request without calling the API / spending credits:
 DRY_RUN=1 ./scripts/ai_fetch.sh "campfire crackling" campfire
 
-# Ask ElevenLabs to synthesize an already-loopable clip (cleaner seam):
-AI_LOOP=1 ./scripts/ai_fetch.sh "gentle rain on leaves" rain_loop
+# Disable native looping for this fetch (loop is on by default):
+AI_LOOP=0 ./scripts/ai_fetch.sh "gentle rain on leaves" rain_noloop
 ```
 
-ElevenLabs can natively generate a smoothly-looping clip (`AI_LOOP=1`). The
-pipeline still runs its own swap-halves+crossfade, but a natively-looping seed
-gives the crossfade less to hide. To measure whether it actually helps for a
-given prompt, `scripts/ai_ab_test.sh` fetches the prompt both ways and scores
-each clip's loop seam (the RMS level-jump at the wrap — lower dB is smoother),
-plus writes a repeated listen-test file for each:
+For ElevenLabs, the clip is generated as a smoothly-looping seed **by default**
+(`loop: true`) — the right default for this looping pipeline. The pipeline still
+runs its own swap-halves+crossfade on top, but a natively-looping seed gives the
+crossfade less to hide. Set `AI_LOOP=0` to turn it off. To compare the two for a
+given prompt, `scripts/ai_ab_test.sh` fetches it both ways and scores each clip's
+loop seam (the RMS level-jump at the wrap — lower dB is smoother), plus writes a
+repeated listen-test file for each:
 
 ```bash
 ./scripts/ai_ab_test.sh "gentle rain on leaves"   # needs ffmpeg + a reachable API
