@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 # Build a short, seamlessly-looping rain audio bed -> build/loop_audio.m4a
 #
-# procedural mode (default): two decorrelated pink-noise sources are spectrally
-# shaped into a rain "shhh", then made gap-free with the classic loop trick:
+# procedural mode (default): rain is synthesised per channel from two layers so
+# it reads as rain rather than flat static:
+#   * wash   - warm brown-noise body + gently rolled-off pink "air"; the harsh
+#              3-5 kHz hiss region is cut so it sounds like rain, not a fan.
+#   * patter - band-passed noise pushed through a compand expander/gate, which
+#              turns steady noise into intermittent droplet transients (the
+#              "pitter-patter"). This granular layer is what sells "rain".
+# Left/right are built from independent noise seeds for natural stereo width,
+# then the whole thing is made gap-free with the classic loop trick:
 #   swap the two halves and crossfade the new seam.
 # The output's ends land on originally-continuous audio, so when it loops there
 # is no click; the only edited seam sits in the middle and is crossfaded.
@@ -43,7 +50,7 @@ seamless_loop() {
   # second-half then first-half, crossfaded at the join (equal-power qsin).
   ffmpeg -y -hide_banner -loglevel error -i "$hb" -i "$ha" \
     -filter_complex "[0:a][1:a]acrossfade=d=${CF}:c1=qsin:c2=qsin[out]" \
-    -map "[out]" -ar "$SR" -c:a aac -b:a 192k "$OUT"
+    -map "[out]" -ar "$SR" -c:a aac -b:a 256k "$OUT"
   rm -f "$ha" "$hb"
 }
 
@@ -68,33 +75,57 @@ if fresh "$OUT" "$CONFIG_FILE" "$0"; then
   log "audio up to date (procedural): $OUT"; exit 0
 fi
 
-# spectral shaping per intensity
+# Per-intensity voicing.
+#   BODY_HP/BODY_LP : brown-noise body band     BODY_W : its level
+#   AIR_LP          : top of the pink "air"      AIR_W  : its level
+#   PAT_F           : patter band centre         PAT_W  : droplet level
+# Lower rain (heavier) has more body, a fuller/lower patter and a little more
+# high extension; lighter rain is thinner and quieter.
 case "$INTENSITY" in
-  light) HP=200; LP=9000;  PATTER=2; LOWSHELF=0 ;;
-  heavy) HP=55;  LP=12000; PATTER=4; LOWSHELF=6 ;;
-  *)     HP=110; LP=11000; PATTER=3; LOWSHELF=2 ;;  # medium
+  light) BODY_HP=90; BODY_LP=5000; AIR_LP=7000; PAT_F=2300; BODY_W=0.7; AIR_W=0.50; PAT_W=0.55 ;;
+  heavy) BODY_HP=42; BODY_LP=6200; AIR_LP=8500; PAT_F=1350; BODY_W=1.4; AIR_W=0.55; PAT_W=1.05 ;;
+  *)     BODY_HP=62; BODY_LP=5600; AIR_LP=8000; PAT_F=1750; BODY_W=1.0; AIR_W=0.55; PAT_W=0.80 ;;  # medium
 esac
 
-SHAPE="highpass=f=${HP},lowpass=f=${LP},equalizer=f=1600:t=q:w=1.4:g=${PATTER},bass=g=${LOWSHELF}:f=180"
+# emit the filter subgraph for one channel: brown input $1, pink input $2, label $3
+chan() {
+  local bi="$1" pi="$2" o="$3"
+  printf '[%s:a]highpass=f=%s,lowpass=f=%s,volume=%s[b%s];' "$bi" "$BODY_HP" "$BODY_LP" "$BODY_W" "$o"
+  printf '[%s:a]asplit=2[air%s][pat%s];' "$pi" "$o" "$o"
+  # air: rolled-off pink with a scoop at ~4.5 kHz to kill the "fan hiss".
+  printf '[air%s]highpass=f=260,lowpass=f=%s,equalizer=f=4500:t=q:w=1.6:g=-4,volume=%s[a%s];' \
+         "$o" "$AIR_LP" "$AIR_W" "$o"
+  # patter: band-pass then compand as a downward expander/gate so only the
+  # random peaks pass -> intermittent droplet transients.
+  printf '[pat%s]bandpass=f=%s:t=h:w=1900,compand=attacks=0.002:decays=0.06:points=-90/-118|-55/-80|-40/-46|-20/-17|0/-3,volume=%s[p%s];' \
+         "$o" "$PAT_F" "$PAT_W" "$o"
+  printf '[b%s][a%s][p%s]amix=inputs=3:normalize=0[%s];' "$o" "$o" "$o" "$o"
+}
 
 log "Synthesising ${RAW_LEN}s rain bed (intensity=${INTENSITY}, thunder=${THUNDER})"
 
 INPUTS=(
-  -f lavfi -i "anoisesrc=color=pink:seed=11:amplitude=0.9:d=${RAW_LEN}:r=${SR}"
+  -f lavfi -i "anoisesrc=color=brown:seed=11:amplitude=0.9:d=${RAW_LEN}:r=${SR}"
   -f lavfi -i "anoisesrc=color=pink:seed=29:amplitude=0.9:d=${RAW_LEN}:r=${SR}"
+  -f lavfi -i "anoisesrc=color=brown:seed=71:amplitude=0.9:d=${RAW_LEN}:r=${SR}"
+  -f lavfi -i "anoisesrc=color=pink:seed=97:amplitude=0.9:d=${RAW_LEN}:r=${SR}"
 )
+
+FC="$(chan 0 1 L)$(chan 2 3 R)[L][R]join=inputs=2:channel_layout=stereo[st];"
 
 if [[ "$THUNDER" == "true" ]]; then
   # distant, continuous rolling rumble (kept stationary so the loop stays seamless;
   # discrete thunderclaps would break looping and are intentionally avoided).
   INPUTS+=(-f lavfi -i "anoisesrc=color=brown:seed=5:amplitude=0.9:d=${RAW_LEN}:r=${SR}")
-  FC="[0:a]${SHAPE}[l];[1:a]${SHAPE}[r];[l][r]join=inputs=2:channel_layout=stereo[st]; \
-      [2:a]lowpass=f=110,volume=0.35,tremolo=f=0.12:d=0.8,aformat=channel_layouts=stereo[th]; \
-      [st][th]amix=inputs=2:weights=1 0.6:normalize=0,loudnorm=I=${TARGET}:TP=-1.5:LRA=11[o]"
+  FC+="[4:a]lowpass=f=100,volume=0.32,tremolo=f=0.12:d=0.8,aformat=channel_layouts=stereo[th]; \
+       [st][th]amix=inputs=2:weights=1 0.6:normalize=0[mix];"
+  LAST="mix"
 else
-  FC="[0:a]${SHAPE}[l];[1:a]${SHAPE}[r];[l][r]join=inputs=2:channel_layout=stereo, \
-      loudnorm=I=${TARGET}:TP=-1.5:LRA=11[o]"
+  LAST="st"
 fi
+
+# subsonic cleanup + loudness normalisation to the target LUFS.
+FC+="[${LAST}]highpass=f=28,loudnorm=I=${TARGET}:TP=-1.5:LRA=11[o]"
 
 ffmpeg -y -hide_banner -loglevel error "${INPUTS[@]}" \
   -filter_complex "$FC" -map "[o]" -ar "$SR" -ac 2 -c:a pcm_s16le "$RAW"
