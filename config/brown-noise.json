@@ -1,0 +1,13 @@
+{
+  "output_name": "brown_noise_15h.mp4",
+  "duration_seconds": 54000,
+  "width": 1920, "height": 1080, "fps": 24,
+  "visual": {
+    "mode": "procedural", "asset_path": "assets/scene.mp4",
+    "loop_seconds": 20, "intensity": "light", "scene": "window"
+  },
+  "audio": {
+    "mode": "procedural", "type": "brown",
+    "loop_seconds": 60, "crossfade_seconds": 6, "target_lufs": -20
+  }
+}

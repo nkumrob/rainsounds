@@ -1,10 +1,14 @@
-# rainsounds — long-form rain video pipeline
+# rainsounds — long-form ambient video pipeline
 
-A small, dependency-light pipeline that renders a **long-form (e.g. 15-hour)
-relaxing rain video** as a single MP4. It builds one short *seamless* rain
-visual loop and one short *seamless* rain audio loop, then stitches them to the
-target length **without re-encoding**, so even a 15-hour export takes seconds
-and can't fail halfway through.
+A small, dependency-light pipeline that renders **long-form (e.g. 15-hour)
+relaxing ambient videos** as a single MP4. It builds one short *seamless* visual
+loop and one short *seamless* audio loop, then stitches them to the target
+length **without re-encoding**, so even a 15-hour export takes seconds and can't
+fail halfway through.
+
+The audio is a **procedural ambient-sound library** — 12 sounds synthesized
+entirely from FFmpeg noise + filters (no samples), which can be layered into
+soundscapes.
 
 ```
 config/project.json ──► make_visual ──► build/loop_visual.mp4 ─┐
@@ -48,6 +52,67 @@ FORCE=1 ./scripts/make_visual.sh                    # ignore cache, rebuild
 CONFIG_FILE=config/heavy-storm.json make all        # use an alternate config
 ```
 
+## Sound library
+
+The audio is chosen in config. Every sound is synthesized from FFmpeg noise +
+filters — no recordings needed.
+
+| Type | Sound | Type | Sound |
+|------|-------|------|-------|
+| `rain` | rain (warm wash + droplet patter) | `waterfall` | steady heavy roar |
+| `ocean` | surf with slow wave swell | `fan` | warm steady airflow |
+| `wind` | band-limited howl with gusts | `airplane` | cabin drone |
+| `stream` | creek / river burble | `fireplace` | low roar + crackle |
+| `thunder` | distant rolling rumble | `white` | white noise |
+| `brown` | brown noise (deep, bass-heavy) | `pink` | pink noise |
+
+Preview every sound (writes `output/previews/<type>.m4a`):
+
+```bash
+./scripts/preview_sounds.sh 20            # 20s clip of each of the 12 sounds
+TYPES="rain ocean fireplace" ./scripts/preview_sounds.sh 15   # just these
+```
+
+### Single sound
+
+```jsonc
+"audio": {
+  "mode": "procedural",
+  "type": "ocean",          // any type from the table above
+  "intensity": "medium",    // light | medium | heavy  (mainly affects rain)
+  "loop_seconds": 300,
+  "crossfade_seconds": 8,
+  "target_lufs": -20
+}
+```
+
+### Layered soundscapes
+
+Provide `layers` instead of `type` to mix sounds — this is how the classic
+combos ("rain 70% + thunder 20%", "ocean + wind") are built. Each layer has a
+`type` and a relative `gain`:
+
+```jsonc
+"audio": {
+  "mode": "procedural",
+  "loop_seconds": 300,
+  "crossfade_seconds": 8,
+  "target_lufs": -20,
+  "layers": [
+    { "type": "rain",    "gain": 1.0, "intensity": "heavy" },
+    { "type": "thunder", "gain": 0.5 },
+    { "type": "wind",    "gain": 0.3 }
+  ]
+}
+```
+
+Each layer is synthesized independently, mixed by gain, then the combined bed is
+loudness-normalised and made seamless as one unit.
+
+Sounds that realistically need field recordings (forest birds, café, train) are
+best handled with **asset mode** — drop a file in `assets/` and set
+`"mode": "asset"`.
+
 ## Presets
 
 Alternate configs live in `config/`. Point `CONFIG_FILE` at one for any target:
@@ -55,12 +120,15 @@ Alternate configs live in `config/`. Point `CONFIG_FILE` at one for any target:
 | Preset | Look / sound | Notes |
 | --- | --- | --- |
 | `config/project.json` | medium rain, 1080p24 | the default |
-| `config/heavy-storm.json` | heavy rain + continuous distant thunder | louder (`-19 LUFS`) |
+| `config/heavy-storm.json` | rain + thunder + wind (layered) | louder (`-19 LUFS`) |
 | `config/light-sleep.json` | light rain, quiet | gentle (`-23 LUFS`), longer crossfade |
+| `config/ocean.json` | ocean surf + wind (layered) | seaside soundscape |
+| `config/campfire.json` | fireplace + faint wind (layered) | cozy |
+| `config/brown-noise.json` | brown noise | the trending focus/sleep noise |
 | `config/4k.json` | medium rain, 3840×2160 @ 30fps | ~4× the render size |
 
 ```bash
-CONFIG_FILE=config/light-sleep.json make sample   # preview a preset
+CONFIG_FILE=config/ocean.json make sample         # preview a preset
 CONFIG_FILE=config/4k.json make all               # full 4K render
 ```
 
@@ -132,7 +200,7 @@ Drop your files in `assets/` and switch modes in the config:
 
 - **Disk & length.** A 15-hour 1080p render is ~8–9 GB. Make sure you have room;
   the intermediates in `build/` are tiny (a few MB each).
-- **Thunder.** `thunder: true` adds a *continuous* distant rumble that stays
-  loopable. Discrete thunderclaps are intentionally avoided because a one-off
-  event would break seamless looping — layer those separately if you want them.
+- **Thunder.** The `thunder` sound is a *continuous* distant rumble (add it as a
+  layer). Discrete thunderclaps are intentionally avoided because a one-off event
+  would break seamless looping — use asset mode for those.
 - `make clean` removes everything under `build/` and `output/`.

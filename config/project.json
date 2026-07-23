@@ -16,11 +16,11 @@
 
   "audio": {
     "mode": "procedural",
+    "type": "rain",
     "asset_path": "assets/rain.wav",
     "loop_seconds": 300,
     "crossfade_seconds": 8,
     "intensity": "medium",
-    "thunder": false,
     "target_lufs": -20
   }
 }
