@@ -1,0 +1,7 @@
+build/
+output/
+assets/*
+!assets/.gitkeep
+*.ppm
+*.log
+.DS_Store
