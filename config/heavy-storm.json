@@ -1,0 +1,26 @@
+{
+  "output_name": "rain_storm_15h.mp4",
+  "duration_seconds": 54000,
+
+  "width": 1920,
+  "height": 1080,
+  "fps": 24,
+
+  "visual": {
+    "mode": "procedural",
+    "asset_path": "assets/scene.mp4",
+    "loop_seconds": 20,
+    "intensity": "heavy",
+    "scene": "window"
+  },
+
+  "audio": {
+    "mode": "procedural",
+    "asset_path": "assets/rain.wav",
+    "loop_seconds": 300,
+    "crossfade_seconds": 8,
+    "intensity": "heavy",
+    "thunder": true,
+    "target_lufs": -19
+  }
+}

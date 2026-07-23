@@ -45,7 +45,23 @@ Handy overrides:
 ```bash
 DURATION=60 OUT_NAME=test.mp4 ./scripts/render.sh   # quick 60s render
 FORCE=1 ./scripts/make_visual.sh                    # ignore cache, rebuild
-CONFIG_FILE=config/heavy.json make all              # use an alternate config
+CONFIG_FILE=config/heavy-storm.json make all        # use an alternate config
+```
+
+## Presets
+
+Alternate configs live in `config/`. Point `CONFIG_FILE` at one for any target:
+
+| Preset | Look / sound | Notes |
+| --- | --- | --- |
+| `config/project.json` | medium rain, 1080p24 | the default |
+| `config/heavy-storm.json` | heavy rain + continuous distant thunder | louder (`-19 LUFS`) |
+| `config/light-sleep.json` | light rain, quiet | gentle (`-23 LUFS`), longer crossfade |
+| `config/4k.json` | medium rain, 3840×2160 @ 30fps | ~4× the render size |
+
+```bash
+CONFIG_FILE=config/light-sleep.json make sample   # preview a preset
+CONFIG_FILE=config/4k.json make all               # full 4K render
 ```
 
 ## Configuration — `config/project.json`

@@ -89,7 +89,7 @@ if [[ "$THUNDER" == "true" ]]; then
   # discrete thunderclaps would break looping and are intentionally avoided).
   INPUTS+=(-f lavfi -i "anoisesrc=color=brown:seed=5:amplitude=0.9:d=${RAW_LEN}:r=${SR}")
   FC="[0:a]${SHAPE}[l];[1:a]${SHAPE}[r];[l][r]join=inputs=2:channel_layout=stereo[st]; \
-      [2:a]lowpass=f=110,volume=0.35,tremolo=f=0.07:d=0.8,aformat=channel_layouts=stereo[th]; \
+      [2:a]lowpass=f=110,volume=0.35,tremolo=f=0.12:d=0.8,aformat=channel_layouts=stereo[th]; \
       [st][th]amix=inputs=2:weights=1 0.6:normalize=0,loudnorm=I=${TARGET}:TP=-1.5:LRA=11[o]"
 else
   FC="[0:a]${SHAPE}[l];[1:a]${SHAPE}[r];[l][r]join=inputs=2:channel_layout=stereo, \

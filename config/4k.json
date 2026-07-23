@@ -1,0 +1,26 @@
+{
+  "output_name": "rain_4k_15h.mp4",
+  "duration_seconds": 54000,
+
+  "width": 3840,
+  "height": 2160,
+  "fps": 30,
+
+  "visual": {
+    "mode": "procedural",
+    "asset_path": "assets/scene.mp4",
+    "loop_seconds": 20,
+    "intensity": "medium",
+    "scene": "window"
+  },
+
+  "audio": {
+    "mode": "procedural",
+    "asset_path": "assets/rain.wav",
+    "loop_seconds": 300,
+    "crossfade_seconds": 8,
+    "intensity": "medium",
+    "thunder": false,
+    "target_lufs": -20
+  }
+}
