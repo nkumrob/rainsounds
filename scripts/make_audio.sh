@@ -81,10 +81,11 @@ fi
 #   PAT_F           : patter band centre         PAT_W  : droplet level
 # Lower rain (heavier) has more body, a fuller/lower patter and a little more
 # high extension; lighter rain is thinner and quieter.
+# MASTER_LP caps the brightness of the whole mix -> the main de-hiss control.
 case "$INTENSITY" in
-  light) BODY_HP=90; BODY_LP=5000; AIR_LP=7000; PAT_F=2300; BODY_W=0.7; AIR_W=0.50; PAT_W=0.55 ;;
-  heavy) BODY_HP=42; BODY_LP=6200; AIR_LP=8500; PAT_F=1350; BODY_W=1.4; AIR_W=0.55; PAT_W=1.05 ;;
-  *)     BODY_HP=62; BODY_LP=5600; AIR_LP=8000; PAT_F=1750; BODY_W=1.0; AIR_W=0.55; PAT_W=0.80 ;;  # medium
+  light) BODY_HP=90; BODY_LP=5000; AIR_LP=4600; PAT_F=1900; BODY_W=0.85; AIR_W=0.34; PAT_W=0.55; MASTER_LP=5000 ;;
+  heavy) BODY_HP=42; BODY_LP=6200; AIR_LP=6400; PAT_F=1300; BODY_W=1.55; AIR_W=0.42; PAT_W=1.00; MASTER_LP=7000 ;;
+  *)     BODY_HP=60; BODY_LP=5600; AIR_LP=5400; PAT_F=1600; BODY_W=1.20; AIR_W=0.38; PAT_W=0.78; MASTER_LP=6000 ;;  # medium
 esac
 
 # emit the filter subgraph for one channel: brown input $1, pink input $2, label $3
@@ -92,8 +93,8 @@ chan() {
   local bi="$1" pi="$2" o="$3"
   printf '[%s:a]highpass=f=%s,lowpass=f=%s,volume=%s[b%s];' "$bi" "$BODY_HP" "$BODY_LP" "$BODY_W" "$o"
   printf '[%s:a]asplit=2[air%s][pat%s];' "$pi" "$o" "$o"
-  # air: rolled-off pink with a scoop at ~4.5 kHz to kill the "fan hiss".
-  printf '[air%s]highpass=f=260,lowpass=f=%s,equalizer=f=4500:t=q:w=1.6:g=-4,volume=%s[a%s];' \
+  # air: rolled-off pink with a high-shelf cut above ~3 kHz to kill the "fan hiss".
+  printf '[air%s]highpass=f=240,lowpass=f=%s,treble=f=3000:g=-7,volume=%s[a%s];' \
          "$o" "$AIR_LP" "$AIR_W" "$o"
   # patter: band-pass then compand as a downward expander/gate so only the
   # random peaks pass -> intermittent droplet transients.
@@ -124,8 +125,8 @@ else
   LAST="st"
 fi
 
-# subsonic cleanup + loudness normalisation to the target LUFS.
-FC+="[${LAST}]highpass=f=28,loudnorm=I=${TARGET}:TP=-1.5:LRA=11[o]"
+# subsonic cleanup + master low-pass (warmth / de-hiss) + loudness normalisation.
+FC+="[${LAST}]highpass=f=28,lowpass=f=${MASTER_LP},loudnorm=I=${TARGET}:TP=-1.5:LRA=11[o]"
 
 ffmpeg -y -hide_banner -loglevel error "${INPUTS[@]}" \
   -filter_complex "$FC" -map "[o]" -ar "$SR" -ac 2 -c:a pcm_s16le "$RAW"
