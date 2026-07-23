@@ -113,6 +113,32 @@ Sounds that realistically need field recordings (forest birds, café, train) are
 best handled with **asset mode** — drop a file in `assets/` and set
 `"mode": "asset"`.
 
+### AI-generated sounds (optional)
+
+For maximum realism you can generate a seed clip with an AI model and let the
+pipeline loop it. AI models only make short clips (seconds); this pipeline's
+seamless-loop + no-re-encode render is the other half — **AI gives realism, the
+pipeline gives length.** Flow: `prompt → short AI clip → assets/ → seamless 15h`.
+
+```bash
+# ElevenLabs (hosted SFX API; commercial use on paid plans)
+export ELEVENLABS_API_KEY=...   # from https://elevenlabs.io/api
+./scripts/ai_fetch.sh "heavy rain on a tent, distant thunder" rain_tent
+
+# Stable Audio (hosted; longer ambient clips)
+export STABILITY_API_KEY=...
+AI_PROVIDER=stableaudio AI_DURATION=90 ./scripts/ai_fetch.sh "calm ocean at night" ocean_night
+
+# See the exact request without calling the API / spending credits:
+DRY_RUN=1 ./scripts/ai_fetch.sh "campfire crackling" campfire
+```
+
+The script drops the clip in `assets/` and prints the config snippet to use it
+via asset mode. **Licensing note for monetized videos:** use commercially-
+licensed output — ElevenLabs paid plans, Stable Audio's commercial API, or the
+local *Stable Audio Open Small* model. Avoid non-commercial-only model weights.
+Procedural generators stay the free, offline default; AI is an opt-in upgrade.
+
 ## Presets
 
 Alternate configs live in `config/`. Point `CONFIG_FILE` at one for any target:
