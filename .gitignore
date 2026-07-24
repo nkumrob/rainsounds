@@ -6,3 +6,4 @@ assets/*
 *.ppm
 *.log
 .DS_Store
+.vercel
