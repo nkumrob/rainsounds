@@ -349,6 +349,12 @@ const UI = {
     this.el("theme").addEventListener("click", () =>
       this.applyTheme(document.documentElement.dataset.theme === "night" ? "day" : "night"));
     this.el("timer").addEventListener("click", () => this.cycleTimer());
+    const about = this.el("about");
+    const showAbout = (on) => { about.hidden = !on; };
+    this.el("about-open").addEventListener("click", () => showAbout(true));
+    this.el("about-open-2").addEventListener("click", () => showAbout(true));
+    this.el("about-close").addEventListener("click", () => showAbout(false));
+    about.addEventListener("click", (e) => { if (e.target === about) showAbout(false); });
     if ("wakeLock" in navigator) {
       const wakeBtn = this.el("wake");
       wakeBtn.hidden = false;
@@ -516,6 +522,7 @@ const UI = {
 
   onKey(e) {
     if (e.target.tagName === "INPUT") return;
+    if (e.code === "Escape") { this.el("about").hidden = true; return; }
     if (e.code === "Space") { e.preventDefault(); this.togglePlay(); }
     const keys = { Digit1: "drizzle", Digit2: "downpour", Digit3: "tent" };
     if (keys[e.code]) this.switchMood(keys[e.code]);

@@ -128,6 +128,46 @@ canvas#rain { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 
 .intro-note { color: var(--ink-soft); font-size: var(--t-sm); max-width: 34ch; }
 
+.about-link {
+  background: none; border: none; cursor: pointer;
+  font: inherit; font-size: var(--t-sm); color: var(--ink-soft);
+  min-height: 44px; padding: 0 var(--s-2);
+  transition: color 300ms;
+}
+.about-link:hover { color: var(--ink); }
+
+/* ---------- about panel ---------- */
+
+.about {
+  position: fixed; inset: 0; z-index: 5;
+  overflow-y: auto;
+  background: color-mix(in srgb, var(--bg-0) 88%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.about-inner {
+  max-width: 60ch; margin: 0 auto;
+  padding: var(--s-5) var(--s-3) var(--s-5);
+  position: relative;
+}
+.about h2 {
+  font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 500;
+  font-size: var(--t-lg); margin-bottom: var(--s-3);
+}
+.about h3 {
+  font-family: "Cormorant Garamond", serif; font-style: italic; font-weight: 500;
+  font-size: 1.35rem; margin: var(--s-4) 0 var(--s-2);
+}
+.about p { line-height: 1.65; margin-bottom: var(--s-2); color: var(--ink); }
+.about strong { font-weight: 500; }
+.about a { color: var(--glow); text-underline-offset: 3px; }
+.about-close {
+  position: sticky; top: var(--s-2); float: right;
+  min-width: 44px; min-height: 44px;
+  background: none; border: none; cursor: pointer;
+  color: var(--ink); font-size: 1.6rem; line-height: 1;
+}
+
 /* ---------- persistent chrome ---------- */
 
 .brand {

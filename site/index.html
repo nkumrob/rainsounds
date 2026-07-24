@@ -3,7 +3,33 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>rain sounds</title>
+<title>rain sounds — endless rain for sleep &amp; focus</title>
+<link rel="canonical" href="https://rainsounds.vercel.app/">
+<meta property="og:title" content="rain sounds — endless rain for sleep &amp; focus">
+<meta property="og:description" content="Free, endless, gapless rain. Three moods — drizzle, downpour, tent — a sleep timer, and nothing else. Press begin and stay a while.">
+<meta property="og:url" content="https://rainsounds.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://rainsounds.vercel.app/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="rain sounds — endless rain for sleep &amp; focus">
+<meta name="twitter:description" content="Free, endless, gapless rain. Three moods, a sleep timer, and nothing else.">
+<meta name="twitter:image" content="https://rainsounds.vercel.app/og.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "rain sounds",
+  "url": "https://rainsounds.vercel.app/",
+  "description": "A free web app that plays continuous, seamlessly looping rain for sleep and focus. Three moods (drizzle, downpour, tent), a sleep timer with a slow fade-out, night and day themes, and gapless audio that runs until you stop it.",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript and a modern browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "featureList": "Endless gapless rain loops, three rain moods, 2-second crossfade switching, sleep timer (15/30/60 minutes) with slow fade-out, volume control, keyboard shortcuts, lock-screen media controls, night and day themes, optional keep-screen-awake mode"
+}
+</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-R0WG1FMRF6"></script>
 <script>
@@ -47,7 +73,59 @@
     <span>begin</span>
   </button>
   <p class="intro-note" id="intro-note" hidden></p>
+  <button class="about-link" id="about-open">about the rain</button>
 </div>
+
+<!-- About: always in the DOM so crawlers and answer engines can read it -->
+<section class="about" id="about" hidden aria-label="About rain sounds">
+  <div class="about-inner">
+    <button class="about-close" id="about-close" aria-label="Close">&times;</button>
+
+    <h2>endless rain, for sleep and focus</h2>
+    <p>rain sounds is a free web app that plays continuous, seamlessly looping
+    rain. Pick one of three moods, press begin, and it rains until you stop it.
+    The loops are gapless, so the rain never stutters, restarts, or clicks.</p>
+
+    <h3>the three moods</h3>
+    <p><strong>drizzle</strong> is a light, sparse patter, barely there.
+    <strong>downpour</strong> is heavy, steady rain all around you.
+    <strong>tent</strong> is rain drumming on canvas with thunder far away.
+    Switching moods crossfades the sound over two seconds while the visual
+    rain changes density to match, like the weather itself turning.</p>
+
+    <h3>why rain helps you sleep and concentrate</h3>
+    <p>Steady rain is a natural broadband sound. It masks the sudden noises,
+    such as traffic, doors, and voices, that wake you at night or break your
+    concentration. The research on continuous background sound is
+    encouraging: a 2017 study in <em>Frontiers in Neurology</em> found that
+    broadband sound cut the time healthy sleepers took to fall asleep by
+    roughly 38% in a model of transient insomnia
+    (<a href="https://doi.org/10.3389/fneur.2017.00718" rel="noopener">Messineo
+    et&nbsp;al., 2017</a>). An earlier study in the <em>Journal of Theoretical
+    Biology</em> reported that steady pink-noise-like sound produced more
+    stable brain activity and more consolidated sleep
+    (<a href="https://doi.org/10.1016/j.jtbi.2012.03.007" rel="noopener">Zhou
+    et&nbsp;al., 2012</a>). Rain belongs to this family of smooth,
+    unpredictable-yet-even sounds, which is why so many people fall asleep
+    to it.</p>
+
+    <h3>common questions</h3>
+    <p><strong>Is it free?</strong> Yes, completely. No account, no ads,
+    nothing to install.</p>
+    <p><strong>Does it really loop forever?</strong> Yes. The audio plays as
+    a gapless loop until you pause it or the sleep timer fades it out.</p>
+    <p><strong>Can I fall asleep to it?</strong> That is what the timer is
+    for: choose 15, 30, or 60 minutes and the rain fades out slowly over a
+    final minute, gently enough not to wake you.</p>
+    <p><strong>Does it keep playing when my phone locks?</strong> Yes, the
+    audio continues with the screen off, and play controls appear on your
+    lock screen. There is also an optional keep-screen-awake mode if you
+    want the visuals running.</p>
+    <p><strong>What am I looking at?</strong> Real rain filmed through a
+    window, with generated rainfall layered over it, in a night theme and an
+    overcast day theme.</p>
+  </div>
+</section>
 
 <!-- Controls: fade away when you stop moving -->
 <header class="brand" id="brand" hidden>
@@ -73,6 +151,7 @@
         <input type="range" id="volume" min="0" max="100" step="1" value="80" aria-label="Volume">
       </label>
       <button class="ctl timer" id="timer" aria-label="Sleep timer">timer</button>
+      <button class="ctl" id="about-open-2" aria-label="About rain sounds">about</button>
       <button class="ctl wake" id="wake" aria-label="Keep screen awake" aria-pressed="false" hidden>
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="4.8" width="17.6" height="11.4" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 19.4h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="10.5" r="2.2" fill="currentColor"/></svg>
       </button>
