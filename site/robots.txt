@@ -16,4 +16,4 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://rainsounds.vercel.app/sitemap.xml
+Sitemap: https://rainsound.io/sitemap.xml

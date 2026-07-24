@@ -1,0 +1,16 @@
+{
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "rainsounds.vercel.app" }],
+      "destination": "https://rainsound.io/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "rainsounds.vercel.app" }],
+      "destination": "https://rainsound.io/:path*",
+      "permanent": true
+    }
+  ]
+}
