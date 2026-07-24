@@ -31,6 +31,12 @@
 <div class="vignette" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 
+<!-- Theme switch lives outside the controls so it's reachable from the intro too -->
+<button class="ctl theme theme-corner" id="theme" aria-label="Switch to day">
+  <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+  <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+</button>
+
 <!-- Intro: the first tap is the ritual (autoplay is blocked anyway) -->
 <div class="intro" id="intro">
   <h1 class="wordmark">rain sounds</h1>
@@ -68,10 +74,6 @@
       <button class="ctl timer" id="timer" aria-label="Sleep timer">timer</button>
       <button class="ctl wake" id="wake" aria-label="Keep screen awake" aria-pressed="false" hidden>
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.2" y="4.8" width="17.6" height="11.4" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 19.4h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="10.5" r="2.2" fill="currentColor"/></svg>
-      </button>
-      <button class="ctl theme" id="theme" aria-label="Switch to day">
-        <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
       </button>
     </div>
   </div>

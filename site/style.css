@@ -94,6 +94,9 @@ canvas#rain { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: var(--s-3); text-align: center; padding: var(--s-3);
   transition: opacity 1.4s var(--ease), visibility 1.4s;
+  /* soft pool of ground color so the words hold against the live footage */
+  background: radial-gradient(ellipse 62% 55% at 50% 50%,
+    color-mix(in srgb, var(--bg-0) 62%, transparent), transparent 72%);
 }
 .intro.gone { opacity: 0; visibility: hidden; pointer-events: none; }
 
@@ -221,6 +224,12 @@ input[type="range"]::-moz-range-thumb {
   text-shadow: 0 0 18px color-mix(in srgb, var(--glow) 60%, transparent);
 }
 
+.theme-corner {
+  position: fixed; top: var(--s-3); right: var(--s-4); z-index: 4;
+  transition: opacity var(--fade) var(--ease);
+}
+body.idle .theme-corner { opacity: 0; pointer-events: none; }
+
 .theme .ic-moon { display: none; }
 [data-theme="day"] .theme .ic-moon { display: block; }
 [data-theme="day"] .theme .ic-sun { display: none; }
@@ -239,6 +248,7 @@ input[type="range"]::-moz-range-thumb {
 
 @media (max-width: 640px) {
   .brand { left: var(--s-3); }
+  .theme-corner { right: var(--s-3); }
   .controls-row { gap: var(--s-2); }
   input[type="range"] { width: 72px; }
 }

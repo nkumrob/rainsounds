@@ -372,6 +372,8 @@ const UI = {
       document.addEventListener(ev, () => this.wake(), { passive: true }));
 
     this.markActiveMood();
+    // the rain footage runs from the first moment — the intro floats on it
+    this.videoStart();
     // warm the default mood's bytes while the visitor reads the intro
     AudioEngine.load(this.mood).catch(() => {});
   },
