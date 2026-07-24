@@ -377,6 +377,7 @@ const UI = {
     this.el("brand").hidden = false;
     this.el("controls").hidden = false;
     document.body.classList.remove("paused");
+    this.videoStart();
     RainCanvas.setMood(this.mood);
     RainCanvas.start();
     this.setDesc(MOODS[this.mood].desc);
@@ -397,18 +398,29 @@ const UI = {
   },
 
   togglePlay(forcePlay) {
+    const video = this.el("bgvideo");
     if (AudioEngine.playing && !forcePlay) {
       AudioEngine.pause();
       document.body.classList.add("paused");
       RainCanvas.calm();
+      video.pause();
     } else {
       AudioEngine.resume();
       document.body.classList.remove("paused");
       RainCanvas.start();
+      if (!reducedMotion.matches) video.play().catch(() => {});
     }
     if (navigator.mediaSession) {
       navigator.mediaSession.playbackState = AudioEngine.playing ? "playing" : "paused";
     }
+  },
+
+  videoStart() {
+    // real rain footage under the generative streaks; skipped for
+    // reduced-motion visitors, and a load failure just leaves the gradient
+    if (reducedMotion.matches) return;
+    const video = this.el("bgvideo");
+    video.play().then(() => video.classList.add("on")).catch(() => {});
   },
 
   markActiveMood() {
@@ -478,7 +490,7 @@ const UI = {
     if (this.el("intro").classList.contains("gone")) {
       this.idleTimer = setTimeout(() => {
         document.body.classList.add("idle", "hide-cursor");
-      }, 3500);
+      }, 6000);
     }
   },
 
