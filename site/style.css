@@ -216,6 +216,11 @@ input[type="range"]::-moz-range-thumb {
 
 .timer.armed { color: var(--glow); opacity: 1; }
 
+.wake[aria-pressed="true"] {
+  color: var(--glow); opacity: 1;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--glow) 60%, transparent);
+}
+
 .theme .ic-moon { display: none; }
 [data-theme="day"] .theme .ic-moon { display: block; }
 [data-theme="day"] .theme .ic-sun { display: none; }

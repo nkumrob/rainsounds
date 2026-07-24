@@ -324,6 +324,8 @@ const RainCanvas = {
 
 const UI = {
   mood: store.get("mood", DEFAULT_MOOD) in MOODS ? store.get("mood", DEFAULT_MOOD) : DEFAULT_MOOD,
+  wakeWanted: store.get("wake", "0") === "1",
+  wakeLock: null,
   idleTimer: 0,
   sleepEnd: 0, sleepTick: 0,
   TIMER_STEPS: [0, 15, 30, 60],
@@ -347,6 +349,16 @@ const UI = {
     this.el("theme").addEventListener("click", () =>
       this.applyTheme(document.documentElement.dataset.theme === "night" ? "day" : "night"));
     this.el("timer").addEventListener("click", () => this.cycleTimer());
+    if ("wakeLock" in navigator) {
+      const wakeBtn = this.el("wake");
+      wakeBtn.hidden = false;
+      wakeBtn.setAttribute("aria-pressed", String(this.wakeWanted));
+      wakeBtn.addEventListener("click", () => this.toggleWake());
+      // the OS drops the lock when the tab hides; take it back on return
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") this.syncWake();
+      });
+    }
     this.el("volume").addEventListener("input", (e) => {
       const v = e.target.valueAsNumber / 100;
       AudioEngine.setVolume(v);
@@ -382,6 +394,7 @@ const UI = {
     RainCanvas.start();
     this.setDesc(MOODS[this.mood].desc);
     this.mediaSession();
+    this.syncWake();
     this.wake();
   },
 
@@ -410,8 +423,28 @@ const UI = {
       RainCanvas.start();
       if (!reducedMotion.matches) video.play().catch(() => {});
     }
+    this.syncWake();
     if (navigator.mediaSession) {
       navigator.mediaSession.playbackState = AudioEngine.playing ? "playing" : "paused";
+    }
+  },
+
+  toggleWake() {
+    this.wakeWanted = !this.wakeWanted;
+    store.set("wake", this.wakeWanted ? "1" : "0");
+    this.el("wake").setAttribute("aria-pressed", String(this.wakeWanted));
+    this.syncWake();
+  },
+
+  /* hold the screen-wake lock only while wanted AND playing */
+  async syncWake() {
+    if (!("wakeLock" in navigator)) return;
+    if (this.wakeWanted && AudioEngine.playing) {
+      if (this.wakeLock && !this.wakeLock.released) return;
+      try { this.wakeLock = await navigator.wakeLock.request("screen"); } catch {}
+    } else if (this.wakeLock) {
+      this.wakeLock.release().catch(() => {});
+      this.wakeLock = null;
     }
   },
 
@@ -468,6 +501,8 @@ const UI = {
         AudioEngine.fadeOut(60, () => {
           document.body.classList.add("paused");
           RainCanvas.calm();
+          this.el("bgvideo").pause();
+          this.syncWake();   // let the screen sleep once the rain has faded
         });
         return;
       }
