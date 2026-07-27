@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en" data-theme="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Read Aloud — paste text, press play, listen</title>
+<meta name="description" content="A free, private read-aloud tool. Paste any text and have it read to you with natural voices, adjustable speed, and word-by-word highlighting. Nothing leaves your browser.">
+<link rel="canonical" href="https://readaloud.app/">
+<meta property="og:title" content="Read Aloud — paste text, press play, listen">
+<meta property="og:description" content="A free, private read-aloud tool. Paste any text and listen — natural voices, adjustable speed, word highlighting. Nothing leaves your browser.">
+<meta property="og:url" content="https://readaloud.app/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://readaloud.app/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Read Aloud — paste text, press play, listen">
+<meta name="twitter:description" content="A free, private read-aloud tool. Natural voices, adjustable speed, word highlighting. Nothing leaves your browser.">
+<meta name="twitter:image" content="https://readaloud.app/og.jpg">
+<meta name="theme-color" content="#f6f4ef">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📖%3C/text%3E%3C/svg%3E">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Read Aloud",
+  "url": "https://readaloud.app/",
+  "description": "A free, private web app that reads any text aloud using your browser's built-in voices. Paste text, choose a voice, adjust the speed, and follow along with word-by-word highlighting. Everything runs locally — no text is ever uploaded.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript and a browser with the Web Speech API",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "featureList": "Text-to-speech for any pasted text, natural system voices, adjustable speed and pitch, word-by-word highlighting, click-to-start-from-any-word, pause and resume, sentence skip, sleep-safe local-only processing, light and dark themes, keyboard shortcuts, settings remembered between visits"
+}
+</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip-link" href="#editor">Skip to text</a>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">📖</span>
+    <span class="brand-name">Read Aloud</span>
+  </div>
+  <div class="topbar-actions">
+    <button id="theme-btn" class="icon-btn" type="button" aria-label="Toggle light and dark theme" title="Theme (T)">
+      <span class="theme-icon"></span>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- Unsupported-browser notice -->
+  <div id="unsupported" class="notice" hidden>
+    <strong>Your browser can’t speak yet.</strong>
+    Read Aloud needs the Web Speech API. Try the latest Chrome, Edge, or Safari.
+  </div>
+
+  <section class="editor-card">
+    <div class="editor-head">
+      <label for="editor" class="editor-label">Your text</label>
+      <div class="editor-meta">
+        <span id="counts" aria-live="polite">0 words</span>
+        <button id="sample-btn" class="ghost-btn" type="button">Try a sample</button>
+        <button id="clear-btn" class="ghost-btn" type="button">Clear</button>
+      </div>
+    </div>
+
+    <div class="editor-stack">
+      <!-- Editable input -->
+      <textarea id="editor" class="editor" spellcheck="true"
+        placeholder="Paste an article, an email, a chapter — anything you'd rather listen to. Then press Play. Your text never leaves this browser."></textarea>
+
+      <!-- Read-along overlay (shown while speaking) -->
+      <div id="reader" class="reader" hidden aria-hidden="true"></div>
+    </div>
+  </section>
+</main>
+
+<!-- Sticky transport / controls -->
+<div class="dock">
+  <div class="dock-inner">
+    <div class="transport">
+      <button id="play-btn" class="play-btn" type="button" aria-label="Play" title="Play / Pause (Space)">
+        <svg class="ico ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        <svg class="ico ico-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+      </button>
+      <button id="stop-btn" class="round-btn" type="button" aria-label="Stop" title="Stop (Esc)">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6z"/></svg>
+      </button>
+      <button id="restart-btn" class="round-btn" type="button" aria-label="Restart from beginning" title="Restart (0)">
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>
+      </button>
+    </div>
+
+    <div class="progress-wrap" title="Reading progress">
+      <div id="progress" class="progress"><span id="progress-bar" class="progress-bar"></span></div>
+      <span id="progress-label" class="progress-label">Ready</span>
+    </div>
+
+    <div class="dock-settings">
+      <label class="field">
+        <span class="field-label">Voice</span>
+        <select id="voice" class="select"></select>
+      </label>
+      <label class="field field-slider">
+        <span class="field-label">Speed <b id="rate-val">1.0×</b></span>
+        <input id="rate" class="slider" type="range" min="0.5" max="2.5" step="0.1" value="1">
+      </label>
+      <label class="field field-slider">
+        <span class="field-label">Pitch <b id="pitch-val">1.0</b></span>
+        <input id="pitch" class="slider" type="range" min="0" max="2" step="0.1" value="1">
+      </label>
+    </div>
+  </div>
+</div>
+
+<footer class="foot">
+  <p class="foot-note">
+    Everything runs on your device — your text is never uploaded.
+    Voices come from your operating system, so the selection differs per device.
+  </p>
+  <p class="foot-keys">
+    <kbd>Space</kbd> play/pause · <kbd>Esc</kbd> stop · <kbd>→</kbd>/<kbd>←</kbd> skip sentence · <kbd>T</kbd> theme
+  </p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
